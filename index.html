@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Grid Game</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>Grid Game</h1>
+
+<div id="guide">
+❌ ловушка: -1 деньги -1 опыт |
+💰 деньги: +1 деньги |
+✖️2: x2 деньги +1 опыт |
+⚠️: делит деньги и опыт на 2 |
+💸: делит деньги на 2 |
+⭐ обычная: +1 деньги +1 опыт
+</div>
+
+<div id="stats">
+Деньги: <span id="money">0</span> |
+Опыт: <span id="xp">0</span> |
+Ходы: <span id="moves">0</span>/50
+</div>
+
+<div id="grid"></div>
+
+<div id="potions">
+<h3>Зелья</h3>
+<select id="potionSelect">
+<option value="row">Зелье ряд (0)</option>
+<option value="bomb">Царь-бомба (0)</option>
+<option value="cake">Тортик (0)</option>
+<option value="runner">Бегун (0)</option>
+</select>
+<button id="usePotion">Использовать</button>
+</div>
+
+<script src="game.js"></script>
+
+</body>
+</html>
