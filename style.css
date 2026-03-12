@@ -58,6 +58,23 @@ background:linear-gradient(145deg,#2a003f,#12001f);
 box-shadow:0 0 10px #7a2cff;
 }
 
+/* ⭐ ЗОЛОТАЯ клетка */
+.cell.gold{
+background:linear-gradient(145deg,#ffd700,#b8860b);
+border:1px solid gold;
+box-shadow:0 0 12px gold;
+animation:goldGlow 1.5s infinite alternate;
+}
+
+@keyframes goldGlow{
+from{
+box-shadow:0 0 10px gold;
+}
+to{
+box-shadow:0 0 25px gold;
+}
+}
+
 /* кнопки */
 button{
 background:#3a0066;
@@ -74,6 +91,17 @@ transition:0.2s;
 button:hover{
 background:#6a00ff;
 box-shadow:0 0 10px #8a2be2;
+}
+
+/* кнопка забрать сейчас */
+#takeNow{
+position:fixed;
+right:20px;
+top:50%;
+transform:translateY(-50%);
+background:#5a00aa;
+font-size:16px;
+padding:12px 18px;
 }
 
 /* магазин */
