@@ -8,235 +8,364 @@ const grid = document.getElementById("grid")
 const moneyText = document.getElementById("money")
 const xpText = document.getElementById("xp")
 const movesText = document.getElementById("moves")
+const shop = document.getElementById("shop")
+const takeNowBtn = document.getElementById("takeNow")
 
-// магазин
-const shop = document.createElement("div")
-shop.style.display="none"
-shop.style.marginTop="20px"
-shop.innerHTML=`
-<h2>Магазин</h2>
-<button id="xpToMoney">1 XP → 5 Деньги</button>
-<button id="moneyToXp">5 Денег → 1 XP</button>
-<br><br>
-<h3>Купить зелья:</h3>
-<button id="buyRow">Зелье ряд (5 Денег)</button>
-<button id="buyBomb">Царь-бомба (10 Денег)</button>
-<button id="buyCake">Тортик (7 Денег)</button>
-<button id="buyRunner">Бегун (8 Денег)</button>
-<br><br>
-<button id="ready">Я готов</button>
-`
-document.body.appendChild(shop)
-
-// счетчик зелий
 let potionsCount = { row:0, bomb:0, cake:0, runner:0 }
+let cells = []
+let types = []
 
-let cells=[]
-let types=[]
+let goldenIndex = -1
 
-// Генерация типов клеток с учетом XP
 function generateGrid(){
-  types=[]
 
-  let luckFactor = Math.floor(xp / 10) // каждые 10 XP уменьшают ловушки
-  let trapsCount = Math.max(10 - luckFactor, 2) // минимум 2 ловушки
-  let moneyCount = 20
-  let x2Count = 5
-  let halfAllCount = 5
-  let halfMoneyCount = 5
-  let normalCount = 100 - trapsCount - moneyCount - x2Count - halfAllCount - halfMoneyCount
+types=[]
 
-  // ❌ ловушки
-  for(let i=0;i<trapsCount;i++) types.push("trap")
-  // 💰 деньги
-  for(let i=0;i<moneyCount;i++) types.push("money")
-  // ✖️2
-  for(let i=0;i<x2Count;i++) types.push("x2")
-  // ⚠️ делят деньги и опыт на 2
-  for(let i=0;i<halfAllCount;i++) types.push("halfAll")
-  // 💸 делят деньги на 2
-  for(let i=0;i<halfMoneyCount;i++) types.push("halfMoney")
-  // ⭐ обычные
-  for(let i=0;i<normalCount;i++) types.push("normal")
+let traps=10
+let moneyCells=20
+let x2=5
+let halfAll=5
+let halfMoney=5
+let normal=100-traps-moneyCells-x2-halfAll-halfMoney
 
-  // случайное перемешивание
-  types.sort(()=>Math.random()-0.5)
+for(let i=0;i<traps;i++) types.push("trap")
+for(let i=0;i<moneyCells;i++) types.push("money")
+for(let i=0;i<x2;i++) types.push("x2")
+for(let i=0;i<halfAll;i++) types.push("halfAll")
+for(let i=0;i<halfMoney;i++) types.push("halfMoney")
+for(let i=0;i<normal;i++) types.push("normal")
+
+types.sort(()=>Math.random()-0.5)
+
+/* золотая клетка шанс 1 к 300 */
+
+if(Math.floor(Math.random()*300)===1){
+goldenIndex=Math.floor(Math.random()*100)
+}else{
+goldenIndex=-1
 }
 
-generateGrid()
-
-function playClick(){
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
-  const osc = audioCtx.createOscillator()
-  const gain = audioCtx.createGain()
-  osc.connect(gain)
-  gain.connect(audioCtx.destination)
-  osc.frequency.value = 700
-  osc.type="sine"
-  gain.gain.value = 0.03
-  osc.start()
-  osc.stop(audioCtx.currentTime + 0.04)
-}
-
-function openCell(c){
-  if(c.element.classList.contains("opened")) return
-  c.element.click()
 }
 
 function createGrid(){
-  grid.innerHTML=""  // очищаем старое поле
-  cells=[]
 
-  for(let i=0;i<100;i++){
-    let cell=document.createElement("div")
-    cell.className="cell"
-    let type=types[i]
+grid.innerHTML=""
+cells=[]
 
-    cell.onclick=()=>{
-      if(gameOver) return
-      if(cell.classList.contains("opened")) return
+for(let i=0;i<100;i++){
 
-      playClick()
-      moves++
-      movesText.innerText=moves
-      cell.classList.add("opened")
+let cell=document.createElement("div")
+cell.className="cell"
 
-      // Обработка типов клеток
-      if(type==="trap"){
-        if(cakeActive){ type="normal"; cakeActive=false }
-        money--
-        xp--
-        cell.innerText="❌"
-      }
-      else if(type==="money"){
-        money++
-        cell.innerText="💰"
-      }
-      else if(type==="x2"){
-        money*=2
-        xp++
-        cell.innerText="✖️2"
-      }
-      else if(type==="halfAll"){
-        money=Math.floor(money/2)
-        xp=Math.floor(xp/2)
-        cell.innerText="⚠️"
-      }
-      else if(type==="halfMoney"){
-        money=Math.floor(money/2)
-        cell.innerText="💸"
-      }
-      else{
-        money++
-        xp++
-        cell.innerText="⭐"
-      }
+let type=types[i]
 
-      moneyText.innerText=money
-      xpText.innerText=xp
+cell.onclick=()=>{
 
-      if(moves>=50){ endGame() }
-    }
+if(gameOver) return
+if(cell.classList.contains("opened")) return
 
-    grid.appendChild(cell)
-    cells.push({element:cell,type:type})
-  }
+moves++
+movesText.innerText=moves
+
+cell.classList.add("opened")
+
+/* золотая клетка */
+
+if(i===goldenIndex){
+
+cell.innerText="⭐"
+
+let r=Math.floor(Math.random()*3)
+
+if(r===0){
+money+=100
+xp+=10
 }
 
-createGrid()
+if(r===1){
+money*=5
+xp+=5
+}
+
+if(r===2){
+xp*=2
+money+=10
+}
+
+}
+
+else if(type==="trap"){
+
+if(cakeActive){
+type="normal"
+cakeActive=false
+}
+
+money--
+xp--
+cell.innerText="❌"
+
+}
+
+else if(type==="money"){
+
+money++
+cell.innerText="💰"
+
+}
+
+else if(type==="x2"){
+
+money*=2
+xp++
+cell.innerText="✖️2"
+
+}
+
+else if(type==="halfAll"){
+
+money=Math.floor(money/2)
+xp=Math.floor(xp/2)
+cell.innerText="⚠️"
+
+}
+
+else if(type==="halfMoney"){
+
+money=Math.floor(money/2)
+cell.innerText="💸"
+
+}
+
+else{
+
+money++
+xp++
+cell.innerText="⭐"
+
+}
+
+moneyText.innerText=money
+xpText.innerText=xp
+
+if(moves>=50) endGame()
+
+}
+
+grid.appendChild(cell)
+
+cells.push({
+element:cell,
+type:type
+})
+
+}
+
+}
 
 function endGame(){
-  gameOver=true
-  setTimeout(()=>{
-    cells.forEach(c=>{
-      if(!c.element.classList.contains("opened")){
-        c.element.classList.add("lost")
-        if(c.type==="trap") c.element.innerText="❌"
-        if(c.type==="money") c.element.innerText="💰"
-        if(c.type==="x2") c.element.innerText="✖️2"
-        if(c.type==="halfAll") c.element.innerText="⚠️"
-        if(c.type==="halfMoney") c.element.innerText="💸"
-        if(c.type==="normal") c.element.innerText="⭐"
-      }
-    })
-    openShop()
-  },10000)
+
+gameOver=true
+
+cells.forEach((c,i)=>{
+
+if(!c.element.classList.contains("opened")){
+
+c.element.classList.add("lost")
+
+if(i===goldenIndex) c.element.innerText="⭐"
+else if(c.type==="trap") c.element.innerText="❌"
+else if(c.type==="money") c.element.innerText="💰"
+else if(c.type==="x2") c.element.innerText="✖️2"
+else if(c.type==="halfAll") c.element.innerText="⚠️"
+else if(c.type==="halfMoney") c.element.innerText="💸"
+else if(c.type==="normal") c.element.innerText="⭐"
+
+}
+
+})
+
+openShop()
+
 }
 
 function openShop(){
-  shop.style.display="block"
 
-  document.getElementById("xpToMoney").onclick=()=>{
-    if(xp>=1){ xp-=1; money+=5; updateStats() }
-  }
-  document.getElementById("moneyToXp").onclick=()=>{
-    if(money>=5){ money-=5; xp+=1; updateStats() }
-  }
+shop.style.display="block"
 
-  document.getElementById("buyRow").onclick = ()=>{
-    if(money>=5){ money-=5; potionsCount.row++; updateStats(); updatePotionDisplay(); }
-  }
-  document.getElementById("buyBomb").onclick = ()=>{
-    if(money>=10){ money-=10; potionsCount.bomb++; updateStats(); updatePotionDisplay(); }
-  }
-  document.getElementById("buyCake").onclick = ()=>{
-    if(money>=7){ money-=7; potionsCount.cake++; updateStats(); updatePotionDisplay(); }
-  }
-  document.getElementById("buyRunner").onclick = ()=>{
-    if(money>=8){ money-=8; potionsCount.runner++; updateStats(); updatePotionDisplay(); }
-  }
+shop.innerHTML=`
 
-  document.getElementById("ready").onclick = ()=>{
-    moves=0
-    movesText.innerText=moves
-    gameOver=false
-    cakeActive=false
-    generateGrid()
-    createGrid()
-  }
+<h2>🛒 Магазин</h2>
+
+<h3>Конвертация</h3>
+
+<button onclick="xpToMoney()">1 XP → 5 денег</button>
+<button onclick="moneyToXp()">5 денег → 1 XP</button>
+
+<h3>Купить зелья</h3>
+
+<button onclick="buyPotion('row')">Зелье ряд (5)</button>
+<button onclick="buyPotion('bomb')">Царь-бомба (10)</button>
+<button onclick="buyPotion('cake')">Тортик (7)</button>
+<button onclick="buyPotion('runner')">Бегун (8)</button>
+
+<br><br>
+
+<button onclick="ready()">Я готов</button>
+
+`
+
+}
+
+function ready(){
+
+shop.style.display="none"
+
+moves=0
+movesText.innerText=0
+
+gameOver=false
+cakeActive=false
+
+generateGrid()
+createGrid()
+
+}
+
+takeNowBtn.onclick=()=>{
+
+if(gameOver) return
+
+endGame()
+
+}
+
+function xpToMoney(){
+
+if(xp>=1){
+
+xp--
+money+=5
+updateStats()
+
+}
+
+}
+
+function moneyToXp(){
+
+if(money>=5){
+
+money-=5
+xp++
+updateStats()
+
+}
+
+}
+
+function buyPotion(type){
+
+if(type==="row" && money>=5){
+money-=5
+potionsCount.row++
+}
+
+if(type==="bomb" && money>=10){
+money-=10
+potionsCount.bomb++
+}
+
+if(type==="cake" && money>=7){
+money-=7
+potionsCount.cake++
+}
+
+if(type==="runner" && money>=8){
+money-=8
+potionsCount.runner++
+}
+
+updateStats()
+updatePotionDisplay()
+
 }
 
 function updateStats(){
-  moneyText.innerText=money
-  xpText.innerText=xp
+
+moneyText.innerText=money
+xpText.innerText=xp
+
 }
 
 function updatePotionDisplay(){
-  let select = document.getElementById("potionSelect")
-  select.options[0].text = `Зелье ряд (${potionsCount.row})`
-  select.options[1].text = `Царь-бомба (${potionsCount.bomb})`
-  select.options[2].text = `Тортик (${potionsCount.cake})`
-  select.options[3].text = `Бегун (${potionsCount.runner})`
+
+let select=document.getElementById("potionSelect")
+
+select.options[0].text=`Зелье ряд (${potionsCount.row})`
+select.options[1].text=`Царь-бомба (${potionsCount.bomb})`
+select.options[2].text=`Тортик (${potionsCount.cake})`
+select.options[3].text=`Бегун (${potionsCount.runner})`
+
 }
 
-// зелья
-document.getElementById("usePotion").onclick = ()=>{
-  let potion = document.getElementById("potionSelect").value
-  if(potionsCount[potion]<=0){
-    alert("У тебя нет этого зелья!")
-    return
-  }
+document.getElementById("usePotion").onclick=()=>{
 
-  potionsCount[potion]--
-  updatePotionDisplay()
+let potion=document.getElementById("potionSelect").value
 
-  if(potion==="row"){
-    let row = Math.floor(Math.random()*10)
-    cells.forEach((c,i)=>{ if(Math.floor(i/10)===row) openCell(c) })
-  }
-  else if(potion==="bomb"){
-    for(let i=0;i<30;i++){
-      let r = Math.floor(Math.random()*cells.length)
-      openCell(cells[r])
-    }
-  }
-  else if(potion==="cake"){
-    cakeActive=true
-  }
-  else if(potion==="runner"){
-    cells.forEach(c=>{
-      if(c.type==="trap") c.type="normal"
-      else if(c.type==="normal") c.type="trap"
-    })
-  }
+if(potionsCount[potion]<=0){
+alert("Нет этого зелья")
+return
 }
+
+potionsCount[potion]--
+
+updatePotionDisplay()
+
+if(potion==="row"){
+
+let row=Math.floor(Math.random()*10)
+
+cells.forEach((c,i)=>{
+
+if(Math.floor(i/10)===row){
+c.element.click()
+}
+
+})
+
+}
+
+else if(potion==="bomb"){
+
+for(let i=0;i<30;i++){
+
+let r=Math.floor(Math.random()*cells.length)
+cells[r].element.click()
+
+}
+
+}
+
+else if(potion==="cake"){
+
+cakeActive=true
+
+}
+
+else if(potion==="runner"){
+
+cells.forEach(c=>{
+
+if(c.type==="trap") c.type="normal"
+else if(c.type==="normal") c.type="trap"
+
+})
+
+}
+
+}
+
+generateGrid()
+createGrid()
+updatePotionDisplay()
