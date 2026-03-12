@@ -37,9 +37,9 @@ for(let i=0;i<normal;i++) types.push("normal")
 
 types.sort(()=>Math.random()-0.5)
 
-/* золотая клетка шанс 1 к 300 */
+/* шанс золотой клетки */
 
-if(Math.floor(Math.random()*300)===1){
+if(Math.floor(Math.random()*20)===1){
 goldenIndex=Math.floor(Math.random()*100)
 }else{
 goldenIndex=-1
@@ -59,6 +59,12 @@ cell.className="cell"
 
 let type=types[i]
 
+/* если золотая — делаем её золотой */
+
+if(i===goldenIndex){
+cell.classList.add("gold")
+}
+
 cell.onclick=()=>{
 
 if(gameOver) return
@@ -73,26 +79,29 @@ cell.classList.add("opened")
 
 if(i===goldenIndex){
 
-cell.innerText="⭐"
-
 let r=Math.floor(Math.random()*3)
 
 if(r===0){
 money+=100
 xp+=10
+cell.innerText="🌠"
 }
 
 if(r===1){
 money*=5
 xp+=5
+cell.innerText="⚡"
 }
 
 if(r===2){
 xp*=2
 money+=10
+cell.innerText="🔥"
 }
 
 }
+
+/* обычные клетки */
 
 else if(type==="trap"){
 
