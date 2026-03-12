@@ -1,51 +1,100 @@
+/* основной фон */
 body{
-background:#222;
+background:#0a0015;
 color:white;
-text-align:center;
 font-family:Arial;
+text-align:center;
+margin:0;
+padding:0;
 }
 
-#guide{
-margin:10px;
-padding:10px;
-background:#333;
-border-radius:6px;
+/* верхняя панель статистики */
+#stats{
+margin-top:20px;
+font-size:20px;
+display:flex;
+justify-content:center;
+gap:40px;
 }
 
+/* поле */
 #grid{
-width:500px;
-margin:20px auto;
+width:520px;
+margin:30px auto;
 display:grid;
 grid-template-columns:repeat(10,50px);
-gap:5px;
+grid-gap:4px;
 }
 
+/* клетки */
 .cell{
 width:50px;
 height:50px;
-background:#444;
+background:linear-gradient(145deg,#1a002b,#0a0015);
+border:1px solid #4b0082;
+border-radius:8px;
 display:flex;
 align-items:center;
 justify-content:center;
 cursor:pointer;
-border-radius:5px;
-font-size:20px;
+font-size:22px;
+transition:0.2s;
 }
 
+/* наведение */
+.cell:hover{
+box-shadow:0 0 12px #8a2be2;
+background:linear-gradient(145deg,#22003a,#0d001f);
+}
+
+/* открытая клетка */
 .cell.opened{
-background:green;
+background:linear-gradient(145deg,#6a00ff,#2a004f);
 }
 
+/* клетки которые не открыли */
 .cell.lost{
-background:red;
+background:linear-gradient(145deg,#2a003f,#12001f);
+box-shadow:0 0 10px #7a2cff;
 }
 
-#potions{
+/* кнопки */
+button{
+background:#3a0066;
+color:white;
+border:none;
+padding:10px 15px;
+margin:5px;
+border-radius:6px;
+cursor:pointer;
+font-size:14px;
+transition:0.2s;
+}
+
+button:hover{
+background:#6a00ff;
+box-shadow:0 0 10px #8a2be2;
+}
+
+/* магазин */
+#shop{
 margin-top:20px;
-padding:10px;
-background:#333;
-border-radius:8px;
-width:300px;
+padding:20px;
+background:#120020;
+border:2px solid #5a00aa;
+border-radius:10px;
+width:420px;
 margin-left:auto;
 margin-right:auto;
+box-shadow:0 0 20px #6a00ff;
+display:none;
+}
+
+/* выбор зелья */
+select{
+background:#200033;
+color:white;
+border:1px solid #6a00ff;
+padding:6px;
+border-radius:6px;
 }
